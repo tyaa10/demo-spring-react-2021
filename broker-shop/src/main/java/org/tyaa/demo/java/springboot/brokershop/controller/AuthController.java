@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.tyaa.demo.java.springboot.brokershop.models.ResponseModel;
 import org.tyaa.demo.java.springboot.brokershop.models.RoleModel;
+import org.tyaa.demo.java.springboot.brokershop.models.UserModel;
 import org.tyaa.demo.java.springboot.brokershop.services.interfaces.IAuthService;
 
 import java.util.List;
@@ -43,5 +44,41 @@ public class AuthController {
             httpStatus = HttpStatus.BAD_GATEWAY;
         }
         return new ResponseEntity<>(responseModel, httpStatus);
+    }
+
+    @GetMapping("/admin/roles/{id}/users")
+    public ResponseEntity<ResponseModel> getUsersByRole(@PathVariable Long id) {
+        ResponseModel responseModel =
+                authService.getRoleUsers(id);
+        return new ResponseEntity<>(
+                responseModel,
+                (responseModel.getData() != null)
+                        ? HttpStatus.OK
+                        : HttpStatus.NOT_FOUND
+        );
+    }
+
+    @PostMapping("/users")
+    public ResponseEntity<ResponseModel> createUser(@RequestBody UserModel userModel) {
+        ResponseModel responseModel =
+                authService.createUser(userModel);
+        return new ResponseEntity<>(
+                responseModel,
+                (responseModel.getMessage().toLowerCase().contains("created"))
+                        ? HttpStatus.CREATED
+                        : responseModel.getMessage().contains("name")
+                        ? HttpStatus.CONFLICT
+                        : HttpStatus.BAD_GATEWAY
+        );
+    }
+
+    @DeleteMapping(value = "/users/{id}")
+    public ResponseEntity<ResponseModel> deleteUser(@PathVariable Long id) {
+        return new ResponseEntity<>(authService.deleteUser(id), HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping(value = "/users/{id}/makeadmin")
+    public ResponseEntity<ResponseModel> makeUserAdmin(@PathVariable Long id) throws Exception {
+        return new ResponseEntity<>(authService.makeUserAdmin(id), HttpStatus.OK);
     }
 }
