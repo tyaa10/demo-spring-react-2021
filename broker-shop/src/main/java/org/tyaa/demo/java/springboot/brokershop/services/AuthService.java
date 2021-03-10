@@ -1,6 +1,7 @@
 package org.tyaa.demo.java.springboot.brokershop.services;
 
 import org.springframework.stereotype.Service;
+import org.tyaa.demo.java.springboot.brokershop.entities.Role;
 import org.tyaa.demo.java.springboot.brokershop.models.ResponseModel;
 import org.tyaa.demo.java.springboot.brokershop.models.RoleModel;
 import org.tyaa.demo.java.springboot.brokershop.repositories.RoleDao;
@@ -33,6 +34,15 @@ public class AuthService implements IAuthService {
 
                         ).collect(Collectors.toList())
                 )
+                .build();
+    }
+
+    @Override
+    public ResponseModel createRole(RoleModel roleModel) {
+        roleDao.save(Role.builder().name(roleModel.name).build());
+        return ResponseModel.builder()
+                .status(ResponseModel.SUCCESS_STATUS)
+                .message(String.format("Role %s created", roleModel.name))
                 .build();
     }
 }
