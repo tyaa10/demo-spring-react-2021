@@ -4,6 +4,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.tyaa.demo.java.springboot.brokershop.entities.Role;
 import org.tyaa.demo.java.springboot.brokershop.entities.User;
 import org.tyaa.demo.java.springboot.brokershop.repositories.RoleDao;
@@ -17,7 +18,10 @@ public class BrokerShopApplication {
 	}
 
 	@Bean
-	public CommandLineRunner initData(RoleDao roleDao, UserDao userDao) {
+	public CommandLineRunner initData(
+			RoleDao roleDao,
+			UserDao userDao,
+			PasswordEncoder passwordEncoder) {
 		return args -> {
 			roleDao.save(Role.builder().name("ROLE_ADMIN").build());
 			roleDao.save(Role.builder().name("ROLE_USER").build());
@@ -26,28 +30,28 @@ public class BrokerShopApplication {
 			userDao.save(
 					User.builder()
 							.name("admin")
-							.password("AdminPassword1")
+							.password(passwordEncoder.encode("AdminPassword1"))
 							.role(adminRole)
 							.build()
 			);
 			userDao.save(
 					User.builder()
 							.name("one")
-							.password("UserPassword1")
+							.password(passwordEncoder.encode("UserPassword1"))
 							.role(userRole)
 							.build()
 			);
 			userDao.save(
 					User.builder()
 							.name("two")
-							.password("UserPassword2")
+							.password(passwordEncoder.encode("UserPassword2"))
 							.role(userRole)
 							.build()
 			);
 			userDao.save(
 					User.builder()
 							.name("three")
-							.password("UserPassword3")
+							.password(passwordEncoder.encode("UserPassword3"))
 							.role(userRole)
 							.build()
 			);

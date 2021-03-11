@@ -2,12 +2,14 @@ package org.tyaa.demo.java.springboot.brokershop.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.tyaa.demo.java.springboot.brokershop.models.ResponseModel;
 import org.tyaa.demo.java.springboot.brokershop.models.RoleModel;
 import org.tyaa.demo.java.springboot.brokershop.models.UserModel;
 import org.tyaa.demo.java.springboot.brokershop.services.interfaces.IAuthService;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 @RestController
@@ -80,5 +82,30 @@ public class AuthController {
     @PatchMapping(value = "/users/{id}/makeadmin")
     public ResponseEntity<ResponseModel> makeUserAdmin(@PathVariable Long id) throws Exception {
         return new ResponseEntity<>(authService.makeUserAdmin(id), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/user/check")
+    // @ResponseBody
+    /** @param authentication объект стандартного типа с данными учетной записи
+     * пользователя теущего http-сеанса, если ранее произошла успешная аутентификация,
+     * получается внедрением зависимости через аргумент метода */
+    public ResponseEntity<ResponseModel> checkUser(Authentication authentication) {
+        ResponseModel responseModel = authService.check(authentication);
+        return new ResponseEntity<>(
+                responseModel,
+                (responseModel.getData() != null)
+                        ? HttpStatus.OK
+                        : HttpStatus.UNAUTHORIZED
+        );
+    }
+
+    @GetMapping("/user/signedout")
+    public ResponseEntity<ResponseModel> signedOut(HttpSession httpSession) {
+        return new ResponseEntity<>(authService.onSignOut(), HttpStatus.OK);
+    }
+
+    @GetMapping("/user/onerror")
+    public ResponseEntity<ResponseModel> onError() {
+        return new ResponseEntity<>(authService.onError(), HttpStatus.UNAUTHORIZED);
     }
 }

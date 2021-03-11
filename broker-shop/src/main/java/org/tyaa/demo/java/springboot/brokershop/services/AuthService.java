@@ -1,5 +1,7 @@
 package org.tyaa.demo.java.springboot.brokershop.services;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.tyaa.demo.java.springboot.brokershop.entities.Role;
 import org.tyaa.demo.java.springboot.brokershop.entities.User;
@@ -20,10 +22,12 @@ public class AuthService implements IAuthService {
 
     private final RoleDao roleDao;
     private final UserDao userDao;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthService(RoleDao roleDao, UserDao userDao) {
+    public AuthService(RoleDao roleDao, UserDao userDao, PasswordEncoder passwordEncoder) {
         this.roleDao = roleDao;
         this.userDao = userDao;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -58,7 +62,7 @@ public class AuthService implements IAuthService {
         User user =
                 User.builder()
                         .name(userModel.getName().trim())
-                        .password(userModel.getPassword())
+                        .password(passwordEncoder.encode(userModel.getPassword()))
                         .role(roleDao.findRoleByName("ROLE_USER"))
                         .build();
         userDao.save(user);
@@ -121,5 +125,45 @@ public class AuthService implements IAuthService {
                     .message(String.format("User #%d Not Found", id))
                     .build();
         }
+    }
+
+    // получение подтверждения, что клиент
+    // сейчас аутентифицирован,
+    // и возврат информации об учетной записи
+    public ResponseModel check(Authentication authentication) {
+        ResponseModel response = new ResponseModel();
+        // если пользователь из текущего http-сеанса аутентифицирован
+        if (authentication != null && authentication.isAuthenticated()) {
+            UserModel userModel = UserModel.builder()
+                    .name(authentication.getName())
+                    .roleName(
+                            authentication.getAuthorities().stream()
+                                    .findFirst()
+                                    .get()
+                                    .getAuthority()
+                    )
+                    .build();
+            response.setStatus(ResponseModel.SUCCESS_STATUS);
+            response.setMessage(String.format("User %s Signed In", userModel.name));
+            response.setData(userModel);
+        } else {
+            response.setStatus(ResponseModel.SUCCESS_STATUS);
+            response.setMessage("User is a Guest");
+        }
+        return response;
+    }
+
+    public ResponseModel onSignOut() {
+        return ResponseModel.builder()
+                .status(ResponseModel.SUCCESS_STATUS)
+                .message("Signed out")
+                .build();
+    }
+
+    public ResponseModel onError() {
+        return ResponseModel.builder()
+                .status(ResponseModel.FAIL_STATUS)
+                .message("Auth error")
+                .build();
     }
 }
