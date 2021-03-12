@@ -9,13 +9,11 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder(toBuilder = true)
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserModel {
-    public String name;
-    private String password;
-    public Long roleId;
-    public String roleName;
+public class CategoryModel {
+    private Long id;
+    private String name;
 }
