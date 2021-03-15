@@ -20,7 +20,7 @@ public class User {
     private Long id;
     @Column(name = "name", nullable = false, unique = true, length = 100)
     private String name;
-    @Column(name = "password", nullable = false, length = 32)
+    @Column(name = "password", nullable = false, length = 100)
     private String password;
     @ManyToOne
     @JoinColumn(name="role_id", nullable = false)

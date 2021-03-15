@@ -19,6 +19,6 @@ public class Category {
     private Long id;
     @Column(name = "name", nullable = false, unique = true, length = 50)
     private String name;
-    /* @OneToMany(mappedBy="category", fetch = FetchType.LAZY)
-    private Set<Product> products; */
+    @OneToMany(mappedBy="category", fetch = FetchType.LAZY)
+    private Set<Product> products;
 }
