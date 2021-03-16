@@ -2,6 +2,7 @@ package org.tyaa.demo.java.springboot.brokershop.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.tyaa.demo.java.springboot.brokershop.models.ResponseModel;
@@ -22,7 +23,8 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @GetMapping("/roles")
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/admin/roles")
     public ResponseEntity<ResponseModel> getRoles () {
         ResponseModel responseModel = authService.getRoles();
         HttpStatus httpStatus;
@@ -34,7 +36,8 @@ public class AuthController {
         return new ResponseEntity<>(responseModel, httpStatus);
     }
 
-    @PostMapping("/roles")
+    @Secured("ROLE_ADMIN")
+    @PostMapping("/admin/roles")
     public ResponseEntity<ResponseModel> createRole (@RequestBody RoleModel roleModel) {
         ResponseModel responseModel = authService.createRole(roleModel);
         HttpStatus httpStatus;
@@ -79,6 +82,7 @@ public class AuthController {
         return new ResponseEntity<>(authService.deleteUser(id), HttpStatus.NO_CONTENT);
     }
 
+    @Secured("ROLE_ADMIN")
     @PatchMapping(value = "/users/{id}/makeadmin")
     public ResponseEntity<ResponseModel> makeUserAdmin(@PathVariable Long id) throws Exception {
         return new ResponseEntity<>(authService.makeUserAdmin(id), HttpStatus.OK);
