@@ -1,5 +1,7 @@
 package org.tyaa.demo.java.springboot.brokershop.repositories;
 
+import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.core.types.dsl.StringPath;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,12 +13,14 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.tyaa.demo.java.springboot.brokershop.entities.Category;
 import org.tyaa.demo.java.springboot.brokershop.entities.Product;
+import org.tyaa.demo.java.springboot.brokershop.entities.QProduct;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
-public interface ProductDao extends JpaRepository<Product, Long> {
+public interface ProductDao extends JpaRepository<Product, Long>,
+        QuerydslPredicateExecutor<Product>, QuerydslBinderCustomizer<QProduct> {
 
     // пользовательский метод получения списка товаров,
     // идентификаторы категорий которых входят в множество,
@@ -40,4 +44,15 @@ public interface ProductDao extends JpaRepository<Product, Long> {
     Product findTop1ByOrderByQuantityAsc ();
 
     Integer countProductsByCategory(Category category);
+
+    // добавление поддержки запросов query dsl
+    // (предварительно нужно сгенерировать тип QProduct командой
+    // mvn apt:process или запустить lifecycle task package)
+    @Override
+    default public void customize(
+            QuerydslBindings bindings, QProduct root) {
+        bindings.bind(String.class)
+                .first((SingleValueBinding<StringPath, String>) StringExpression::containsIgnoreCase);
+        bindings.excluding(root.image);
+    }
 }

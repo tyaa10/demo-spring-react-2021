@@ -2,6 +2,7 @@ package org.tyaa.demo.java.springboot.brokershop.services.interfaces;
 
 import org.tyaa.demo.java.springboot.brokershop.models.ProductFilterModel;
 import org.tyaa.demo.java.springboot.brokershop.models.ProductModel;
+import org.tyaa.demo.java.springboot.brokershop.models.ProductSearchModel;
 import org.tyaa.demo.java.springboot.brokershop.models.ResponseModel;
 
 public interface IProductService {
@@ -10,4 +11,5 @@ public interface IProductService {
     ResponseModel getAll();
     ResponseModel delete(Long id);
     ResponseModel getFiltered(ProductFilterModel filter);
+    ResponseModel search(ProductSearchModel searchModel);
 }

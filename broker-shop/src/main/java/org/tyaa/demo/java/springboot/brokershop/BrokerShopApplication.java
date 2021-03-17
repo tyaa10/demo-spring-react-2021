@@ -1,19 +1,33 @@
 package org.tyaa.demo.java.springboot.brokershop;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.tyaa.demo.java.springboot.brokershop.entities.Category;
+import org.tyaa.demo.java.springboot.brokershop.entities.Product;
 import org.tyaa.demo.java.springboot.brokershop.entities.Role;
 import org.tyaa.demo.java.springboot.brokershop.entities.User;
 import org.tyaa.demo.java.springboot.brokershop.repositories.CategoryDao;
+import org.tyaa.demo.java.springboot.brokershop.repositories.ProductDao;
 import org.tyaa.demo.java.springboot.brokershop.repositories.RoleDao;
 import org.tyaa.demo.java.springboot.brokershop.repositories.UserDao;
 
+import java.math.BigDecimal;
+
 @SpringBootApplication
 public class BrokerShopApplication {
+
+	@Value("${tests.unit.strings.image-base64-msft}")
+	private String msftImageString;
+
+	@Value("${tests.unit.strings.image-base64-orcl}")
+	private String orclImageString;
+
+	@Value("${tests.unit.strings.image-base64-eth}")
+	private String ethImageString;
 
 	public static void main(String[] args) {
 		SpringApplication.run(BrokerShopApplication.class, args);
@@ -24,6 +38,7 @@ public class BrokerShopApplication {
 			RoleDao roleDao,
 			UserDao userDao,
 			CategoryDao categoryDao,
+			ProductDao productDao,
 			PasswordEncoder passwordEncoder) {
 		return args -> {
 			roleDao.save(Role.builder().name("ROLE_ADMIN").build());
@@ -64,6 +79,46 @@ public class BrokerShopApplication {
 			categoryDao.save(stockCategory);
 			categoryDao.save(cryptoCategory);
 			categoryDao.save(eMoneyCategory);
+			Product stockMSFTProduct =
+					Product.builder()
+							.name("MSFT")
+							.description("Microsoft Stock")
+							.price(new BigDecimal(203.92))
+							.quantity(1000)
+							.category(stockCategory)
+							.image(msftImageString)
+							.build();
+			Product stockORCLProduct =
+					Product.builder()
+							.name("ORCL")
+							.description("Oracle Stock")
+							.price(new BigDecimal(55.82))
+							.quantity(2000)
+							.category(stockCategory)
+							.image(orclImageString)
+							.build();
+			Product stockORCLProduct2 =
+					Product.builder()
+							.name("ORCL")
+							.description("Oracle Stock")
+							.price(new BigDecimal(56.12))
+							.quantity(1000)
+							.category(stockCategory)
+							.image(orclImageString)
+							.build();
+			Product cryptoEthereumProduct =
+					Product.builder()
+							.name("ETH")
+							.description("Ethereum Cryptocurrency")
+							.price(new BigDecimal(232.48))
+							.quantity(500)
+							.category(cryptoCategory)
+							.image(ethImageString)
+							.build();
+			productDao.save(stockMSFTProduct);
+			productDao.save(stockORCLProduct);
+			productDao.save(stockORCLProduct2);
+			productDao.save(cryptoEthereumProduct);
 		};
 	}
 }
