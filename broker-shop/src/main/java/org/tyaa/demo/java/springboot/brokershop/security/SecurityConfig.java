@@ -8,11 +8,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
 @Order(1)
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
 
     private final HibernateWebAuthProvider authProvider;
 
@@ -38,18 +40,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // а кодом ajax на языке javascript
         http.csrf().disable()
             // отключение модуля проверки кросс-доменных запросов
-            .cors().disable()
+            // .cors().disable()
             .exceptionHandling()
             .authenticationEntryPoint(restAuthenticationEntryPoint)
             .and()
             // раздел отображений: адрес запроса -> настройки доступа
             .authorizeRequests()
             // разрешить всем
-            .antMatchers(HttpMethod.GET, "/api/auth/user/**").permitAll()
+            .antMatchers(HttpMethod.GET, "/api/auth/users/**").permitAll()
             // разрешить всем
-            .antMatchers(HttpMethod.POST, "/api/auth/user/**").permitAll()
+            .antMatchers(HttpMethod.POST, "/api/auth/users/**").permitAll()
             // разрешить только аутентифицированным пользователям с любой ролью
-            .antMatchers(HttpMethod.DELETE, "/api/auth/user/**").authenticated()
+            .antMatchers(HttpMethod.DELETE, "/api/auth/users/**").authenticated()
                 .antMatchers("/api/auth/roles").permitAll()
             .antMatchers(HttpMethod.GET, "/api/auth/role/**").permitAll()
             .antMatchers("/api/cart/**").authenticated()
@@ -63,7 +65,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             // раздел настройки ответов после попытки авторизации
             .formLogin()
             .successHandler(savedReqAwareAuthSuccessHandler)
-            .failureUrl("/api/auth/user/onerror")
+            .failureUrl("/api/auth/users/onerror")
             // установка пользовательского URI, на который должен обратиться клиент
             // для попытки входа в учетную запись -
             // не производится, потому что в Spring Security
@@ -79,7 +81,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             // для выхода из учетной записи
             .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
             // адрес перенаправления на бэкенде в случае успешного выхода из учетной записи
-            .logoutSuccessUrl("/api/auth/user/signedout");
+            .logoutSuccessUrl("/api/auth/users/signedout");
 
         // Auth demo
         // 1. /login (POST)
@@ -90,5 +92,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 4. /api/user (GET)
         // 5. /api/role (GET)
         // 6. /logout (GET)
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**") // разрешаем обращаться к любым адресам
+                .allowedOrigins("http://localhost:3000") // клиентам, полученным с указанного адреса
+                .allowedMethods("*"); // все методы http-запросов разрешены
     }
 }

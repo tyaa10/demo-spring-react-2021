@@ -88,7 +88,7 @@ public class AuthController {
         return new ResponseEntity<>(authService.makeUserAdmin(id), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/user/check")
+    @GetMapping(value = "/users/check")
     // @ResponseBody
     /** @param authentication объект стандартного типа с данными учетной записи
      * пользователя теущего http-сеанса, если ранее произошла успешная аутентификация,
@@ -103,12 +103,12 @@ public class AuthController {
         );
     }
 
-    @GetMapping("/user/signedout")
+    @GetMapping("/users/signedout")
     public ResponseEntity<ResponseModel> signedOut(HttpSession httpSession) {
         return new ResponseEntity<>(authService.onSignOut(), HttpStatus.OK);
     }
 
-    @GetMapping("/user/onerror")
+    @GetMapping("/users/onerror")
     public ResponseEntity<ResponseModel> onError() {
         return new ResponseEntity<>(authService.onError(), HttpStatus.UNAUTHORIZED);
     }
