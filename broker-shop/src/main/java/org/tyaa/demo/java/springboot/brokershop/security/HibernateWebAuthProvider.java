@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.tyaa.demo.java.springboot.brokershop.entities.User;
 import org.tyaa.demo.java.springboot.brokershop.repositories.UserDao;
 
+import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,7 +28,6 @@ import java.util.logging.Logger;
 public class HibernateWebAuthProvider implements AuthenticationProvider, UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
-
     private final UserDao userDao;
 
     public HibernateWebAuthProvider(PasswordEncoder passwordEncoder, UserDao userDAO) {

@@ -39,8 +39,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebM
         // что веб-запросы отправлются не из веб-страниц в формами,
         // а кодом ajax на языке javascript
         http.csrf().disable()
-            // отключение модуля проверки кросс-доменных запросов
-            // .cors().disable()
+            .cors()
+            .and()
             .exceptionHandling()
             .authenticationEntryPoint(restAuthenticationEntryPoint)
             .and()
@@ -98,6 +98,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebM
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // разрешаем обращаться к любым адресам
                 .allowedOrigins("http://localhost:3000") // клиентам, полученным с указанного адреса
-                .allowedMethods("*"); // все методы http-запросов разрешены
+                .allowedMethods("*") // все методы http-запросов разрешены
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(8600);
     }
 }
