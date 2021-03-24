@@ -16,9 +16,14 @@ class UserStore {
 
     constructor() {
         makeObservable(this)
+        // установка слежения за адресной строкой
         history.listen((location) => {
+            // если содержимое адресной строки изменилось
             // console.log(`You changed the page to: ${location.pathname}`)
+            // если адресная строка включет подстроку "/auth:out",
+            // указывающую, что происходит переход по маршруту "Выход из учетной записи"
             if (location.pathname.includes("/auth:out")) {
+                // в текущем модуле хранилища вызываем действие выхода
                 this.logout()
             }
         })
@@ -119,11 +124,14 @@ class UserStore {
 
     @action logout () {
         commonStore.setLoading(true)
-        fetch(`${commonStore.authBasename}/logout`).then((response) => {
+        fetch(`${commonStore.authBasename}/logout`, {
+            credentials: 'include'
+        }).then((response) => {
             return response.json()
         }).then((response) => {
             if (response) {
                 if (response.status === 'success') {
+                    // если выход произошел успешно - знуляем наблюдаемое свойство user
                     this.setUser(null)
                 } else if (response.status === 'fail') {
                     commonStore.setError(response.message)

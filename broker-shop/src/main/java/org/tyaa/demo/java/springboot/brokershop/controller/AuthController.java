@@ -105,7 +105,7 @@ public class AuthController {
     }
 
     @GetMapping("/users/signedout")
-    public ResponseEntity<ResponseModel> signedOut(HttpSession httpSession) {
+    public ResponseEntity<ResponseModel> signedOut(/* HttpSession httpSession */) {
         return new ResponseEntity<>(authService.onSignOut(), HttpStatus.OK);
     }
 
