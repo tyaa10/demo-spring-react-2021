@@ -5,13 +5,15 @@ import App from './components/App'
 import commonStore from './stores/CommonStore'
 import routerStore from './stores/RouterStore'
 import userStore from './stores/UserStore'
+import categoryStore from './stores/CategoryStore'
 import reportWebVitals from './reportWebVitals'
 import {Provider} from "mobx-react";
 
 const stores = {
     commonStore,
     routerStore,
-    userStore
+    userStore,
+    categoryStore
 }
 
 ReactDOM.render(
