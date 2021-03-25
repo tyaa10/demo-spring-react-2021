@@ -6,6 +6,7 @@ import Home from "../components/pages/Home";
 import About from "../components/pages/About";
 import Shopping from "../components/pages/Shopping";
 import SignIn from "../components/pages/SignIn";
+import SignUp from "../components/pages/SignUp";
 
 class RouterStore {
 
@@ -14,7 +15,8 @@ class RouterStore {
         { path: '/', name: 'Home', Component: Home },
         { path: '/shopping', name: 'Shopping', Component: Shopping },
         { path: '/about', name: 'About', Component: About },
-        { path: '/signin', name: 'Log In', Component: SignIn }
+        { path: '/signin', name: 'Log In', Component: SignIn },
+        { path: '/signup', name: 'Registration', Component: SignUp }
     ]
 
     // список моделей роутов для аунтентифицированного пользователя

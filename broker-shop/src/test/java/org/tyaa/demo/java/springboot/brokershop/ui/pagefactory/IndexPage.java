@@ -14,6 +14,8 @@ public class IndexPage extends AbstractPage {
     // родительского класса
     @FindBy(css = ".MuiAppBar-root a[href*='signin']")
     private WebElement signInButton;
+    @FindBy(css = ".MuiAppBar-root a[href*='signup']")
+    private WebElement signUpButton;
     // для пункта "Выход" подготавливаем только селектор,
     // потому что он будет отображаться только после входа
     private By logOutButton = By.cssSelector(".MuiAppBar-root a[href*='auth:out']");
@@ -26,6 +28,12 @@ public class IndexPage extends AbstractPage {
     public SignInPage clickSignIn() {
         signInButton.click();
         return new SignInPage(driver);
+    }
+
+    // симуляция клика по пункту на панели навигации "Регистрация"
+    public SignUpPage clickSignUp() {
+        signUpButton.click();
+        return new SignUpPage(driver);
     }
 
     public String getLogOutButtonText() {
