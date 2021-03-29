@@ -8,7 +8,7 @@ class CategoryStore {
     private HTTP_STATUS_OK: number = 200
     private HTTP_STATUS_CREATED: number = 201
 
-    @observable currentCategoryId: BigInteger | null = null
+    @observable currentCategoryId: number | null = null
     @observable categories: Array<Category> = []
     @observable name: string = ''
 
@@ -20,7 +20,7 @@ class CategoryStore {
         this.name = name
     }
 
-    @action setCurrentCategoryId(id: BigInteger | null) {
+    @action setCurrentCategoryId(id: number | null) {
         this.currentCategoryId = id
         const currentCategory =
             this.categories.find((c: CategoryModel) => c.id === id)

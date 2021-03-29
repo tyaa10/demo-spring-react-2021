@@ -1,42 +1,43 @@
-const dashboardProducts = () => <div>"Products"</div>
-export default dashboardProducts
-
-/* import React, {Component} from 'react'
+import React, {Component} from 'react'
 import {inject, observer} from 'mobx-react'
 import Resizer from 'react-image-file-resizer'
 import {reaction} from 'mobx'
 import {
-    Button,
+    Button, createStyles,
     Drawer,
     FormControl,
-    Icon, InputLabel,
+    InputLabel,
     MenuItem,
     Select,
     Table,
-    TextField,
+    TextField, Theme,
     withStyles,
     WithStyles
 } from "@material-ui/core";
+import {Send as SendIcon, Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon} from "@material-ui/icons"
 import {CommonStore} from "../../../stores/CommonStore"
 import {ProductStore} from "../../../stores/ProductStore"
 import {CategoryStore} from "../../../stores/CategoryStore"
-import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator'
+// import {promises} from "fs";
+// import {SelectInputProps} from "@material-ui/core/Select/SelectInput";
+import CategoryModel from "../../../models/CategoryModel";
+// import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator'
 
-interface IProps extends WithStyles<typeof styles> {
+interface IProps {}
+
+interface IInjectedProps extends IProps, WithStyles<typeof styles> {
     commonStore: CommonStore,
     productStore: ProductStore,
     categoryStore: CategoryStore
 }
 
 interface IState {
-    // режимы формы: добавить / редактировать
-    formMode: string,
     // флаг: отображать ли сейчас панель
     sidePanelVisibility: boolean
 }
 
-const styles = theme =>
-    ({
+const styles = (theme: Theme) =>
+    createStyles({
         title: {
             display: 'inline',
             marginRight: 15
@@ -59,12 +60,9 @@ const styles = theme =>
         imageTextField: {
             display: 'none'
         },
-        errorBlock: {
-            right: 0,
-            fontSize: '12px',
-            color: 'red300',
-            position: 'absolute',
-            marginTop: '-25px',
+        hiddenInput: {
+            opacity: 0,
+            height: 0
         }
     })
 
@@ -72,22 +70,25 @@ const styles = theme =>
 @observer
 class DashboardProducts extends Component<IProps, IState> {
 
-    constructor(props) {
+    constructor(props: IProps) {
         super(props)
         this.state = {
-            formMode: 'add',
             sidePanelVisibility: false
         }
+    }
+
+    get injected () {
+        return this.props as IInjectedProps
     }
 
     // прямая ссылка, которую можно нацелить на какой-либо
     // элекмент разметки,
     // и обращаться к его свойствам из логики
-    titleRef = React.createRef()
+    // titleRef = React.createRef()
 
     componentDidMount() {
-        this.props.categoryStore.fetchCategories()
-        this.props.productStore.fetchProducts()
+        this.injected.categoryStore.fetchCategories()
+        this.injected.productStore.fetchProducts()
     }
 
     // метод отображения/скрытия боковой панели
@@ -106,63 +107,70 @@ class DashboardProducts extends Component<IProps, IState> {
         this.setState({sidePanelVisibility: open})
     }
 
-
-    handleProductTitleChange = e => {
-        this.props.productStore.setProductTitle(e.target.value)
+    handleProductTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.injected.productStore.setProductTitle(e.target.value)
     }
 
-    handleProductDescriptionChange = e => {
-        this.props.productStore.setProductDescription(e.target.value)
+    handleProductDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.injected.productStore.setProductDescription(e.target.value)
     }
 
-    handleProductCategoryChange = e => {
-        this.props.productStore.setProductCategory(e.target.value)
-        document.getElementById('productCategoryValidator').setAttribute('value', e.target.value)
+    // обработчик события выбора пункта в выпадающем списке категорий -
+    // ИД категории для текущего товара (создаваемого или редактируемого)
+    handleProductCategoryChange = (e: React.ChangeEvent<{ name?: string, value: unknown }>) => {
+        if (typeof e.target.value === 'string') {
+            this.injected.productStore.setProductCategory(Number(e.target.value))
+            // когда ИД категории выбран
+            // императивно дублируем его в скрытый элемент ввода на форме
+            // (на элемент ввода установлен стандартный валидатор)
+            document.getElementById('productCategoryValidator')?.setAttribute('value', e.target.value)
+        }
     }
 
-    handleProductPriceChange = e => {
-        this.props.productStore.setProductPrice(e.target.value)
+    handleProductPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.injected.productStore.setProductPrice(Number(e.target.value))
     }
 
-    handleProductQuantityChange = e => {
-        this.props.productStore.setProductQuantity(e.target.value)
+    handleProductQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.injected.productStore.setProductQuantity(Number(e.target.value))
     }
 
-    handleProductImageChange = e => {
+    handleProductImageChange = (e: React.FormEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         // из аргументов события получаем ссылку на объект-источник события,
         // и из него - путь к выбранному файлу изображения товара
-        const file = e.target.files[0]
-        // передаем в функцию обрезки
-        this.resizeFile(file).then((image: string) => {
-            // когда преоразование будет завершено -
-            // установим получившуюся строку base64
-            // в модель товара в локльном хранилище
-            this.props.productStore.setProductImage(image)
-        })
+        const ev: React.FormEvent<HTMLInputElement> = e as React.FormEvent<HTMLInputElement>
+        const files = ev.currentTarget.files
+        if (files) {
+            const file = files[0]
+            if(file) {
+                // передаем в функцию обрезки
+                this.resizeFile(file).then((image: unknown) => {
+                    // когда преоразование будет завершено -
+                    // установим получившуюся строку base64
+                    // в модель товара в локльном хранилище
+                    if (typeof image === 'string') {
+                        this.injected.productStore.setProductImage(image)
+                    }
+                })
+            }
+        }
     }
 
-    handleProductAdd = (e) => {
-        this.setState({formMode: 'add'})
+    handleProductAdd = (e: React.MouseEvent) => {
         this.setState({sidePanelVisibility: true})
     }
 
-    handleProductEdit = (e, productId) => {
-        this.props.productStore.setCurrentProductId(productId)
-        this.setState({formMode: 'edit'})
+    handleProductEdit = (e: React.MouseEvent, productId: number) => {
+        this.injected.productStore.setCurrentProductId(productId)
         this.setState({sidePanelVisibility: true})
-        // из свойств, переданных компонентом-оберткой внедрения,
-        // получаем и используем ссылку на экземпляр докального хранилища productStore
-        const currentProduct =
-            this.props.productStore.products.find(p => p.id === productId)
-        this.props.productStore.setCurrentProduct(currentProduct)
     }
 
-    handleProductDelete = (e, productId) => {
-        this.props.productStore.setCurrentProductId(productId)
-        this.props.productStore.deleteProduct()
+    handleProductDelete = (e: React.MouseEvent, productId: number) => {
+        this.injected.productStore.setCurrentProductId(productId)
+        this.injected.productStore.deleteProduct()
     }
 
-    handleBlur = (e) => {
+    /* handleBlur = (e) => {
         console.log(e.target.name + 'Ref')
         console.log(this[e.target.name + 'Ref'].current)
         // склеимаем из значения атрибута name элемента управления,
@@ -170,24 +178,23 @@ class DashboardProducts extends Component<IProps, IState> {
         // имя переменной текущего компонента -
         // ссылки на элемент управления
         this[e.target.name + 'Ref'].current.validate(e.target.value)
-    }
+    } */
 
-    handleSubmitForm = e => {
+    handleSubmitForm = (e: React.FormEvent) => {
         // предотвращаем отправку данных формы на сервер браузером
         // и перезагрузку страницы
         e.preventDefault()
         this.setState({sidePanelVisibility: false})
-        if (this.state.formMode === 'add') {
-            this.props.productStore.add()
+        if (!this.injected.productStore.currentProductId) {
+            this.injected.productStore.add()
         } else {
-            this.setState({formMode: 'add'})
-            this.props.productStore.update()
+            this.injected.productStore.update()
         }
     }
 
     // функция обрезки файла изображения товара до 300х300 пикселей
     // при помощи библиотеки "react-image-file-resizer"
-    resizeFile = (file) => new Promise(resolve => {
+    resizeFile = (file: File) => new Promise(resolve => {
         Resizer.imageFileResizer(file, 300, 300, 'JPEG', 100, 0,
             uri => {
                 resolve(uri);
@@ -197,20 +204,20 @@ class DashboardProducts extends Component<IProps, IState> {
     })
 
     imageReaction = reaction(
-        () => this.props.productStore.currentProductImage, // следим за свойством user
+        () => this.injected.productStore.currentProductImage, // следим за свойством currentProductImage
         (image) => {
             // при изменении значения свойства image -
             // обработанное на клиенте изображение
             // показываем пользователю
-            document.getElementById('productImage').setAttribute('src', image)
+            document.getElementById('productImage')?.setAttribute('src', image)
         }
     )
 
     render() {
-        const {loading} = this.props.commonStore
-        const {products} = this.props.productStore
-        const {categories} = this.props.categoryStore
-        const { classes } = this.props
+        const {loading} = this.injected.commonStore
+        const {products} = this.injected.productStore
+        const {categories} = this.injected.categoryStore
+        const { classes } = this.injected
         return <div>
             <h2 className={classes.title}>Products</h2>
             <Button
@@ -219,17 +226,15 @@ class DashboardProducts extends Component<IProps, IState> {
                 onClick={this.handleProductAdd}
             >
                 Add
-                <Icon>
-                    add
-                </Icon>
+                <AddIcon/>
             </Button>
             <Drawer
                 open={ this.state.sidePanelVisibility } onClose={this.toggleDrawer(false)}>
-                <ValidatorForm
+                <form
                     className={classes.form}
                     onSubmit={this.handleSubmitForm}
                     onError={errors => console.log(errors)}
-                    ref='form'
+                    /* ref='form' */
                 >
                     <FormControl
                         className={classes.formControl}
@@ -238,7 +243,7 @@ class DashboardProducts extends Component<IProps, IState> {
                             id='title'
                             name='title'
                             label={'product title'}
-                            value={this.props.productStore.currentProduct.title}
+                            value={this.injected.productStore.title}
                             onChange={this.handleProductTitleChange}
                             required
                         />
@@ -248,13 +253,13 @@ class DashboardProducts extends Component<IProps, IState> {
                         <Select
                             id="category"
                             labelId='category-label'
-                            value={this.props.productStore.currentProduct.categoryId}
+                            value={this.injected.productStore.categoryId}
                             onChange={this.handleProductCategoryChange}
                         >
-                            {categories.map(category => {
-                                // console.log(category.id, this.props.productStore.currentProduct.categoryId)
+                            {categories.map((category: CategoryModel) => {
                                 return (
                                     <MenuItem
+                                        key={category.id}
                                         value={category.id.toString()}
                                         >
                                         {category.name}
@@ -265,8 +270,8 @@ class DashboardProducts extends Component<IProps, IState> {
                             id='productCategoryValidator'
                             tabIndex={-1}
                             autoComplete="off"
-                            style={{ opacity: 0, height: 0 }}
-                            value={this.props.productStore.currentProduct.categoryId?.toString()}
+                            className={classes.hiddenInput}
+                            value={this.injected.productStore.categoryId?.toString()}
                             required={true}
                         />
                     </FormControl>
@@ -274,7 +279,7 @@ class DashboardProducts extends Component<IProps, IState> {
                         <TextField
                             id='description'
                             label={'description'}
-                            value={this.props.productStore.currentProduct.description}
+                            value={this.injected.productStore.description}
                             onChange={this.handleProductDescriptionChange}
                         />
                     </FormControl>
@@ -282,7 +287,7 @@ class DashboardProducts extends Component<IProps, IState> {
                         <TextField
                             id="price"
                             label={'price'}
-                            value={this.props.productStore.currentProduct.price}
+                            value={this.injected.productStore.price}
                             onChange={this.handleProductPriceChange}
                             required
                             inputProps={{pattern: '[0-9]*[.]?[0-9]+'}}
@@ -294,14 +299,14 @@ class DashboardProducts extends Component<IProps, IState> {
                             label={'quantity'}
                             type='number'
                             inputProps={{'min': 0}}
-                            value={this.props.productStore.currentProduct.quantity}
+                            value={this.injected.productStore.quantity}
                             onChange={this.handleProductQuantityChange}
                         />
                     </FormControl>
                     <FormControl className={classes.formControl}>
                         <div>
                             <div>
-                                <img id='productImage'/>
+                                <img alt='product' id='productImage'/>
                             </div>
                             <div>
                                 <Button
@@ -329,12 +334,10 @@ class DashboardProducts extends Component<IProps, IState> {
                             type='submit'
                         >
                             Submit
-                            <Icon>
-                                send
-                            </Icon>
+                            <SendIcon/>
                         </Button>
                     </FormControl>
-                </ValidatorForm>
+                </form>
             </Drawer>
             <Table>
                 <thead>
@@ -356,24 +359,23 @@ class DashboardProducts extends Component<IProps, IState> {
                             <td>{product.quantity}</td>
                             <td>{product.price}</td>
                             <td>
-                                <div data-product-id={product.id}>
+                                <div>
                                     <Button
                                         onClick={(e) => {
                                             this.handleProductEdit(e, product.id)
                                         }}>
-                                        <Icon>edit</Icon>
+                                        <EditIcon/>
                                     </Button>
                                     <Button
                                         onClick={(e) => {
                                             this.handleProductDelete(e, product.id)
                                         }}>
-                                        <Icon>delete</Icon>
+                                        <DeleteIcon/>
                                     </Button>
                                 </div>
                             </td>
                         </tr>
                     )
-
                 })}
                 </tbody>
             </Table>
@@ -381,4 +383,4 @@ class DashboardProducts extends Component<IProps, IState> {
     }
 }
 
-export default withStyles(styles)(DashboardProducts)*/
+export default withStyles(styles)(DashboardProducts)

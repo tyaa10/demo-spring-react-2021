@@ -1,12 +1,12 @@
 export default class ProductModel {
-    public id: BigInteger
+    public id: number
     public title: string
     public description: string
     public quantity: number
     public price: number
-    public categoryId: BigInteger
+    public categoryId: number
     public image: string
-    constructor (id: BigInteger, title: string, description: string, quantity: number, price: number, categoryId: Uint8Array, image: string) {
+    constructor (id: number, title: string, description: string, quantity: number, price: number, categoryId: number, image: string) {
         this.id = id
         this.title = title
         this.description = description

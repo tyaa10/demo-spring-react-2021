@@ -77,12 +77,12 @@ class DashboardCategories extends Component<IProps, IState> {
         this.setState({sidePanelVisibility: true})
     }
 
-    handleCategoryEdit = (e: React.MouseEvent, categoryId: BigInteger) => {
+    handleCategoryEdit = (e: React.MouseEvent, categoryId: number) => {
         this.injected.categoryStore.setCurrentCategoryId(categoryId)
         this.setState({sidePanelVisibility: true})
     }
 
-    handleCategoryDelete = (e: React.MouseEvent, categoryId: BigInteger) => {
+    handleCategoryDelete = (e: React.MouseEvent, categoryId: number) => {
         this.injected.categoryStore.setCurrentCategoryId(categoryId)
         this.injected.categoryStore.deleteCategory()
     }

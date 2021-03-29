@@ -1,7 +1,7 @@
 export default class CategoryModel {
-    public id: BigInteger
+    public id: number
     public name: string
-    constructor (id: BigInteger, name: string) {
+    constructor (id: number, name: string) {
         this.id = id
         this.name = name
     }
