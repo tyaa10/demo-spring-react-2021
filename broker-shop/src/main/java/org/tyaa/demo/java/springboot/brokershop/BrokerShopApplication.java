@@ -1,6 +1,6 @@
 package org.tyaa.demo.java.springboot.brokershop;
 
-import org.apache.catalina.connector.Connector;
+// import org.apache.catalina.connector.Connector;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -126,7 +126,7 @@ public class BrokerShopApplication {
 		};
 	}
 
-	@Bean
+	/* @Bean
 	public ConfigurableServletWebServerFactory webServerFactory() {
 		TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
 		factory.addConnectorCustomizers(new TomcatConnectorCustomizer() {
@@ -136,5 +136,5 @@ public class BrokerShopApplication {
 			}
 		});
 		return factory;
-	}
+	} */
 }
