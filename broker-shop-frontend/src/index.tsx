@@ -7,6 +7,7 @@ import routerStore from './stores/RouterStore'
 import userStore from './stores/UserStore'
 import categoryStore from './stores/CategoryStore'
 import productStore from './stores/ProductStore'
+import cartStore from './stores/CartStore'
 import reportWebVitals from './reportWebVitals'
 import {Provider} from "mobx-react";
 
@@ -15,7 +16,8 @@ const stores = {
     routerStore,
     userStore,
     categoryStore,
-    productStore
+    productStore,
+    cartStore
 }
 
 ReactDOM.render(

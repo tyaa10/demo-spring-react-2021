@@ -16,7 +16,8 @@ import {UserStore} from "../../stores/UserStore";
 import {inject, observer} from "mobx-react";
 import {Alert} from "@material-ui/lab";
 import {Filter as FilterIcon, ExpandMore as ExpandMoreIcon, List as ListIcon, Sort as SortIcon} from "@material-ui/icons"
-import CategoryModel from "../../models/CategoryModel";
+import CategoryModel from "../../models/CategoryModel"
+import {CartStore} from '../../stores/CartStore'
 
 interface IPreviousSearch {
     searchString: string,
@@ -30,7 +31,8 @@ interface IInjectedProps extends IProps, WithStyles<typeof styles> {
     commonStore: CommonStore,
     productStore: ProductStore,
     categoryStore: CategoryStore,
-    userStore: UserStore
+    userStore: UserStore,
+    cartStore: CartStore
 }
 
 interface IState {
@@ -77,7 +79,7 @@ const styles = (theme: Theme) =>
         }
     })
 
-@inject('commonStore', 'productStore', 'categoryStore', 'userStore')
+@inject('commonStore', 'productStore', 'categoryStore', 'userStore', 'cartStore')
 @observer
 class Shopping extends Component<IProps, IState> {
     constructor(props: IProps) {
@@ -208,6 +210,12 @@ class Shopping extends Component<IProps, IState> {
             return;
         }
         this.setState({snackBarVisibility: false})
+    }
+    handleAddToCart = (e: React.MouseEvent, productId: number) => {
+        this.injected.cartStore.addToCart(productId, () => {
+            this.setState({snackBarText: 'One item added to Your cart'})
+            this.setState({snackBarVisibility: true})
+        })
     }
     render () {
         const { loading } = this.injected.commonStore
@@ -405,7 +413,7 @@ class Shopping extends Component<IProps, IState> {
                                             size="small"
                                             color="primary"
                                             onClick={(e) => {
-                                                /* this.handleAddToCart(e, product.id) */
+                                                this.handleAddToCart(e, product.id)
                                             }}
                                             style={{display: this.injected.userStore.user ? 'inline' : 'none' }}>
                                             Add to cart

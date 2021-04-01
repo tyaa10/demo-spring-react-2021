@@ -6,7 +6,11 @@ import {
     NavLink
 } from 'react-router-dom'
 import {inject, observer} from "mobx-react"
+import {
+    ShoppingCart as ShoppingCartIcon
+}  from "@material-ui/icons"
 import {UserStore} from '../../stores/UserStore'
+import {CartStore} from '../../stores/CartStore'
 import RouteModel from "../../models/RouteModel"
 
 interface IProps {
@@ -14,7 +18,8 @@ interface IProps {
 }
 
 interface IInjectedProps extends IProps, WithStyles<typeof styles> {
-    userStore: UserStore
+    userStore: UserStore,
+    cartStore: CartStore
 }
 
 interface IState {
@@ -56,15 +61,27 @@ const styles = ((theme: Theme) => createStyles({
     },
     mobileButtonBarItemActive: {
         backgroundColor: '#ccc',
+    },
+    shoppingCart: {
+        marginRight: '10px'
     }
 }))
 
-@inject('userStore')
+@inject('userStore', 'cartStore')
 @observer
 class AppBarCollapse extends Component<IProps, IState> {
 
     get injected () {
         return this.props as IInjectedProps
+    }
+
+    // обработчик события "клик по иконе корзины" - переключатель видимости корзины
+    handleCartIconClick = (e: React.MouseEvent) => {
+        if (this.injected.cartStore.cartShown) {
+            this.injected.cartStore.setCartVisibility(false)
+        } else {
+            this.injected.cartStore.setCartVisibility(true)
+        }
     }
 
     render () {
@@ -123,6 +140,11 @@ class AppBarCollapse extends Component<IProps, IState> {
                             return ''
                         }
                     })}
+                </div>
+                <div className={classes.shoppingCart} style={{display: this.injected.userStore.user ? 'inline' : 'none' }}>
+                    <ShoppingCartIcon
+                        onClick={this.handleCartIconClick}
+                    /> {this.injected.cartStore.cartItemsCount} ({this.injected.cartStore.cartItemsTotalPrice})
                 </div>
             </div>
         )

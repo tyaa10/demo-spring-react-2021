@@ -9,8 +9,8 @@ class CommonStore {
     // текст ошибки, если он получен с сервера
     @observable error: string = ''
     // основа URL REST API для запросов
-    @observable basename: string = 'http://localhost:8090/shop/api'
-    @observable authBasename: string = 'http://localhost:8090/shop'
+    @observable basename: string = 'http://localhost:8080/shop/api'
+    @observable authBasename: string = 'http://localhost:8080/shop'
 
     constructor () {
         makeObservable(this)
