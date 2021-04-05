@@ -1,6 +1,7 @@
 import {action, makeObservable, observable} from "mobx"
 import User from '../models/UserModel'
 import commonStore from './CommonStore'
+import cartStore from './CartStore'
 import history from "../history";
 
 class UserStore {
@@ -68,6 +69,7 @@ class UserStore {
                 if (response.status === 'success') {
                     if (response.data) {
                         this.user = new User(response.data.name, response.data.roleName)
+                        cartStore.fetchCartItems()
                     }
                 } else if (response.status === 'fail') {
                     // установка в переменную хранилища сообщения об ошибке

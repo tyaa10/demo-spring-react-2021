@@ -1,5 +1,5 @@
 import React from 'react'
-import { Router, Route } from 'react-router-dom'
+import { Router, Route, RouteComponentProps } from 'react-router-dom'
 import history from "../history"
 import {CommonStore} from '../stores/CommonStore'
 import {RouterStore} from '../stores/RouterStore'
@@ -25,18 +25,26 @@ import {
   ExposureNeg1 as ExposureNeg1Icon,
   Clear as ClearIcon
 }  from "@material-ui/icons"
+import {UserStore} from "../stores/UserStore";
+
+interface MatchParams {
+  payment_success: string,
+  payment_cancel: string
+}
 
 interface IProps {
   // здесь перечисляются все внешние параметры (свойства),
   // переданные явно из объекта родительского компонента
+  startLocation: string
 }
 
-interface IInjectedProps extends IProps, WithStyles<typeof styles> {
+interface IInjectedProps extends IProps, WithStyles<typeof styles>, RouteComponentProps<MatchParams> {
   // здесь перечисляются все внешние параметры (свойства),
   // переданные неявно (например, внедрением зависимости при помощи дектораторов)
   commonStore: CommonStore,
   routerStore: RouterStore,
-  cartStore: CartStore
+  cartStore: CartStore,
+  userStore: UserStore
 }
 
 interface IState {
@@ -90,7 +98,7 @@ const styles = (theme: Theme) => createStyles({
     }
 })
 
-@inject('commonStore', 'routerStore', 'cartStore')
+@inject('commonStore', 'routerStore', 'cartStore', 'userStore')
 @observer
 class App extends React.Component<IProps, IState> {
 
@@ -109,14 +117,43 @@ class App extends React.Component<IProps, IState> {
     return this.props as IInjectedProps
   }
 
-  /* componentDidMount() {
-    this.injected.commonStore.setLoading(true)
+  componentDidMount() {
+    /* this.injected.commonStore.setLoading(true)
     fetch('http://localhost:8090/shop/api/categories')
         .then(response => response.json())
         .then(responseBody => console.log(responseBody))
         .catch(reason => console.log(reason))
-        .finally(() => this.injected.commonStore.setLoading(false))
-  } */
+        .finally(() => this.injected.commonStore.setLoading(false)) */
+    // восстановление аутентификации пользователя на фронтенде,
+    // если она была выполнена в предыдущем сеансе,
+    // и пользователь не вышел после этого из учетной записи
+    this.injected.userStore.check()
+    // если в адресной строке присутствуют параметры -
+    // настраиваем вид и текст окна уведомеления и показываем его,
+    // меняя соответствующим образом значения свойств состояния компонента
+    console.log('this.injected', this.props)
+    if (this.injected.match) {
+      console.log('this.injected.match.params', this.injected.match.params)
+    }
+    if (this.injected.match && this.injected.match.params.payment_success) {
+      this.setState({snackBarText: 'Payment successful'})
+      this.setState({snackBarSeverity: 'success'})
+      this.setState({snackBarVisibility: true})
+    } else if (this.injected.match && this.injected.match.params.payment_cancel) {
+      this.setState({snackBarText: 'Payment canceled'})
+      this.setState({snackBarSeverity: 'info'})
+      this.setState({snackBarVisibility: true})
+    }
+    if (this.props.startLocation && this.props.startLocation.includes('payment_success')) {
+      this.setState({snackBarText: 'Payment successful'})
+      this.setState({snackBarSeverity: 'success'})
+      this.setState({snackBarVisibility: true})
+    } else if (this.props.startLocation && this.props.startLocation.includes('payment_cancel')) {
+      this.setState({snackBarText: 'Payment canceled'})
+      this.setState({snackBarSeverity: 'info'})
+      this.setState({snackBarVisibility: true})
+    }
+  }
 
   handleErrorModalClose = (e: React.KeyboardEvent | React.MouseEvent) => {
     this.injected.commonStore.setError('')
@@ -152,6 +189,7 @@ class App extends React.Component<IProps, IState> {
 
   render () {
     const {classes, routerStore} = this.injected
+    console.log('this.injected 2 = ', this.props)
     return (
         <Router history={history}>
           <div className={classes.root}>
@@ -226,7 +264,7 @@ class App extends React.Component<IProps, IState> {
                         <tbody>
                         {this.injected.cartStore.cartItems.map(item => {
                           return (
-                              <tr>
+                              <tr key={item.productId}>
                                 <th scope="row">{item.name}</th>
                                 <td>{item.price}</td>
                                 <td>{item.quantity}</td>
