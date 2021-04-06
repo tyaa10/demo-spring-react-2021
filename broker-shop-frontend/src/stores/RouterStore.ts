@@ -15,7 +15,7 @@ class RouterStore {
 
     // список моделей роутов для гостя
     private anonymousRoutes: Array<RouteModel> = [
-        { path: '/:payment_result', name: 'Home', Component: Home },
+        { path: '/', name: 'Home', Component: Home },
         { path: '/shopping', name: 'Shopping', Component: Shopping },
         { path: '/about', name: 'About', Component: About },
         { path: '/signin', name: 'Log In', Component: SignIn },
@@ -24,7 +24,7 @@ class RouterStore {
 
     // список моделей роутов для аунтентифицированного пользователя
     private loggedRoutes: Array<RouteModel> = [
-        { path: '/:payment_result', name: 'Home', Component: Home },
+        { path: '/', name: 'Home', Component: Home },
         { path: '/shopping', name: 'Shopping', Component: Shopping },
         { path: '/about', name: 'About', Component: About },
         { path: '/auth:out', name: 'Log Out', Component: Home }
@@ -47,16 +47,6 @@ class RouterStore {
 
     constructor() {
         makeObservable(this)
-        history.listen((location) => {
-            console.log('location.pathname', location)
-            if (location.hash.includes("#payment_success")) {
-                alert('success')
-            } else if (location.hash.includes("#payment_cancel")) {
-                alert('cancel')
-            } else if (location.hash.includes("#payment_error")) {
-                alert('error')
-            }
-        })
     }
 
     // установить в качестве текущего список роутов для гостя

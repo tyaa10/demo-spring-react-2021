@@ -119,8 +119,9 @@ public class CartController {
             Authentication authentication,
             PaymentService paymentService
     ) throws PayPalRESTException {
+        Cart cart = cartService.getCart(authentication);
         // завершение платежа
-        paymentService.executePayment(paymentId, payerId);
+        paymentService.executePayment(paymentId, payerId, cart);
         cartService.clearCartItems(authentication);
         // возврат перенаправления вместо имени представления -
         // на страницу, сообщающую об успешном завершении оплаты

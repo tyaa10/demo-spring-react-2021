@@ -19,7 +19,6 @@ const stores = {
     productStore,
     cartStore
 }
-console.log('location', window.location.pathname)
 ReactDOM.render(
   <React.StrictMode>
     <Provider {...stores}>

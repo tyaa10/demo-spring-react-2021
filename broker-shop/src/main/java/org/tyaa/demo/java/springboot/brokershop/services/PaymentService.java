@@ -3,13 +3,13 @@ package org.tyaa.demo.java.springboot.brokershop.services;
 import com.paypal.api.payments.*;
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.tyaa.demo.java.springboot.brokershop.BrokerShopApplication;
+import org.tyaa.demo.java.springboot.brokershop.messaging.EventDispatcher;
+import org.tyaa.demo.java.springboot.brokershop.messaging.OrderCompletedEvent;
 import org.tyaa.demo.java.springboot.brokershop.models.Cart;
 import org.tyaa.demo.java.springboot.brokershop.models.ResponseModel;
 
-import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,19 +17,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Transactional
 public class PaymentService {
 
-    /* private final APIContext apiContext;
+    private EventDispatcher eventDispatcher;
+    private APIContext apiContext;
 
-    public PaymentService(APIContext apiContext) {
+    /* public PaymentService(EventDispatcher eventDispatcher, APIContext apiContext) {
+        this.eventDispatcher = eventDispatcher;
         this.apiContext = apiContext;
     } */
 
     /* @Autowired
     public APIContext apiContext; */
 
-    public APIContext apiContext;
+    // public APIContext apiContext;
 
     /* @PostConstruct
     private void postConstruct () {
@@ -39,6 +40,7 @@ public class PaymentService {
 
     /** Создание объекта платежа и отправка запроса на агрегатор
      * для получения его веб-фронтенда */
+    @Transactional
     public Payment createPayment(
             Cart cart,
             String currency,
@@ -88,7 +90,8 @@ public class PaymentService {
 
     /** Реакция на получение ответа и перенаправления от агрегатора
      * - второй запрос с просьбой закрыть транзакцию */
-    public ResponseModel executePayment(String paymentId, String payerId) throws PayPalRESTException{
+    @Transactional
+    public ResponseModel executePayment(String paymentId, String payerId, Cart cart) throws PayPalRESTException{
         Payment payment = new Payment();
         payment.setId(paymentId);
         PaymentExecution paymentExecute = new PaymentExecution();
@@ -97,6 +100,16 @@ public class PaymentService {
                 BrokerShopApplication.applicationContext.getBean("apiContext", APIContext.class);
         payment = payment.execute(apiContext, paymentExecute);
         if (payment.getState().equals("approved")) {
+            eventDispatcher =
+                    BrokerShopApplication.applicationContext.getBean("eventDispatcher", EventDispatcher.class);
+            // отправка асинхронного сообщения об оплаченном заказе
+            // в очередь RabbitMQ для микросервиса broker
+            eventDispatcher.send(
+                    OrderCompletedEvent.builder()
+                            .orderId(paymentId)
+                            .cart(cart)
+                            .build()
+            );
             return ResponseModel.builder()
                     .status("success")
                     .message("Payment successful with id: " + payment.getId())

@@ -6,7 +6,7 @@ import {RouterStore} from '../stores/RouterStore'
 import {CartStore} from '../stores/CartStore'
 import {inject, observer} from 'mobx-react'
 import {
-  AppBar, Button,
+  AppBar, Button, CircularProgress,
   Container,
   createStyles, Grid, IconButton,
   Modal, Snackbar,
@@ -131,11 +131,11 @@ class App extends React.Component<IProps, IState> {
     // если в адресной строке присутствуют параметры -
     // настраиваем вид и текст окна уведомеления и показываем его,
     // меняя соответствующим образом значения свойств состояния компонента
-    console.log('this.injected', this.props)
-    if (this.injected.match) {
+    // console.log('this.injected', this.injected)
+    /* if (this.injected.match) {
       console.log('this.injected.match.params', this.injected.match.params)
-    }
-    if (this.injected.match && this.injected.match.params.payment_success) {
+    } */
+    /* if (this.injected.match && this.injected.match.params.payment_success) {
       this.setState({snackBarText: 'Payment successful'})
       this.setState({snackBarSeverity: 'success'})
       this.setState({snackBarVisibility: true})
@@ -143,14 +143,18 @@ class App extends React.Component<IProps, IState> {
       this.setState({snackBarText: 'Payment canceled'})
       this.setState({snackBarSeverity: 'info'})
       this.setState({snackBarVisibility: true})
-    }
+    } */
     if (this.props.startLocation && this.props.startLocation.includes('payment_success')) {
-      this.setState({snackBarText: 'Payment successful'})
+      this.setState({snackBarText: 'Payment is successful'})
       this.setState({snackBarSeverity: 'success'})
       this.setState({snackBarVisibility: true})
     } else if (this.props.startLocation && this.props.startLocation.includes('payment_cancel')) {
-      this.setState({snackBarText: 'Payment canceled'})
+      this.setState({snackBarText: 'Payment was canceled'})
       this.setState({snackBarSeverity: 'info'})
+      this.setState({snackBarVisibility: true})
+    } else if (this.props.startLocation && this.props.startLocation.includes('payment_error')) {
+      this.setState({snackBarText: 'Payment error'})
+      this.setState({snackBarSeverity: 'error'})
       this.setState({snackBarVisibility: true})
     }
   }
@@ -189,7 +193,7 @@ class App extends React.Component<IProps, IState> {
 
   render () {
     const {classes, routerStore} = this.injected
-    console.log('this.injected 2 = ', this.props)
+    const progress = (this.injected.commonStore.loading ? <CircularProgress/> : '')
     return (
         <Router history={history}>
           <div className={classes.root}>
@@ -319,6 +323,7 @@ class App extends React.Component<IProps, IState> {
                 {this.state.snackBarText}
               </Alert>
             </Snackbar>
+            {progress}
           </div>
         </Router>
     )

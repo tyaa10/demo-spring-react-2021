@@ -7,14 +7,17 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="broker-shop" />
+        <module name="broker-admin" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="broker-admin" target="11" />
       <module name="broker-shop" target="11" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="broker-admin" options="-parameters" />
       <module name="broker-shop" options="-parameters" />
     </option>
   </component>
