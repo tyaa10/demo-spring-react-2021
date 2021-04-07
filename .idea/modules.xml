@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/broker-admin/broker-admin.iml" filepath="$PROJECT_DIR$/broker-admin/broker-admin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/broker-admin-frontend/broker-admin-frontend.iml" filepath="$PROJECT_DIR$/broker-admin-frontend/broker-admin-frontend.iml" />
       <module fileurl="file://$PROJECT_DIR$/broker-shop/broker-shop.iml" filepath="$PROJECT_DIR$/broker-shop/broker-shop.iml" />
       <module fileurl="file://$PROJECT_DIR$/broker-shop-frontend/broker-shop-frontend.iml" filepath="$PROJECT_DIR$/broker-shop-frontend/broker-shop-frontend.iml" />
     </modules>
