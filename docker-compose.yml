@@ -1,0 +1,108 @@
+version: "3"
+
+services:
+
+  mysql:
+    container_name: mysql
+    image: mysql:5.7
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - 3307:3306
+    environment:
+      MYSQL_DATABASE: spring_react_shop
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./volumes/database:/var/lib/mysql
+    # restart: always
+    networks:
+      - spring_net
+
+  mongo:
+    container_name: mongo
+    image: mongo:3.2.4
+    ports:
+      - 27018:27017
+    command: --smallfiles # Usually, the first datafile allocated has a size of 64MB.
+    # The next has 128MB. This doubling goes on until 2GB are reached.
+    # After that, every new datafile is allocated with 2GB.
+    # The smallfiles option simply sets the initial size to 16MB, and the doubling starts from there.
+    # restart: always
+    networks:
+      - spring_net
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - 5673:5672
+      - 15673:15672
+    networks:
+      - spring_net
+
+  spring-app-shop:
+    container_name: spring-app-shop
+    build:
+      context: ./broker-shop
+      dockerfile: ./Dockerfile
+    volumes:
+      - ~/.m2:/root/.m2
+    ports:
+      - 8080:8080
+    depends_on:
+      - mysql
+      - mongo
+      - rabbitmq
+    command: ["./wait-for-it.sh", "mysql:3307", "--", "mvn", "spring-boot:run", "-Dspring-boot.run.profiles=docker", "-X"]
+    networks:
+      - spring_net
+
+  spring-app-broker:
+    container_name: spring-app-broker
+    build:
+      context: ./broker-admin
+      dockerfile: ./Dockerfile
+    volumes:
+      - ~/.m2:/root/.m2
+    ports:
+      - 8081:8080
+    depends_on:
+      - mongo
+      - rabbitmq
+      - spring-app-shop
+    command: ["./wait-for-it.sh", "spring-app-shop:8080", "--", "mvn", "spring-boot:run", "-Dspring-boot.run.profiles=docker", "-X"]
+    networks:
+      - spring_net
+
+  spring-app-shop-front:
+    container_name: spring-app-shop-front
+    build:
+      context: ./broker-shop-frontend
+      dockerfile: ./Dockerfile
+    ports:
+      - 3000:3000
+    depends_on:
+      - mongo
+      - rabbitmq
+      - spring-app-shop
+    command: ["./wait-for-it.sh", "spring-app-shop:8080", "--", "npm", "start"]
+    networks:
+      - spring_net
+
+  spring-app-broker-front:
+    container_name: spring-app-broker-front
+    build:
+      context: ./broker-admin-frontend
+      dockerfile: ./Dockerfile
+    ports:
+      - 3001:3000
+    depends_on:
+      - mongo
+      - rabbitmq
+      - spring-app-broker
+    command: ["./wait-for-it.sh", "spring-app-broker:8081", "--", "npm", "start"]
+    networks:
+      - spring_net
+
+networks:
+  spring_net:
+    driver: bridge
