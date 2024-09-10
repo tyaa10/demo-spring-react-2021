@@ -10,10 +10,6 @@
         <module name="broker-admin" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="broker-admin" target="11" />
-      <module name="broker-shop" target="11" />
-    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
